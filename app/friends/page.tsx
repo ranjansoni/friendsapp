@@ -23,10 +23,12 @@ export default function FriendsList() {
             });
     }, []);
 
-    const filteredFriends = friends.filter(friend =>
-        friend.fullName.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        friend.country?.toLowerCase().includes(searchTerm.toLowerCase())
-    );
+    const filteredFriends = friends
+        .filter(friend =>
+            friend.fullName.toLowerCase().includes(searchTerm.toLowerCase()) ||
+            friend.country?.toLowerCase().includes(searchTerm.toLowerCase())
+        )
+        .sort((a, b) => a.fullName.localeCompare(b.fullName));
 
     return (
         <div className="min-h-screen bg-gray-50">
