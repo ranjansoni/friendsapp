@@ -1,0 +1,71 @@
+// This is your Prisma schema file
+// Learn more: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "mysql"
+  url      = env("DATABASE_URL")
+}
+
+model Friend {
+  id          String   @id @default(cuid())
+  fullName    String
+  country     String?
+  phone       String?
+  email       String?
+  birthMonth  Int      // 1-12
+  birthDay    Int      // 1-31
+  birthYear   Int?     // Optional - null if only month/day known
+  notes       String?  @db.Text
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+  
+  wishes      BirthdayWish[]
+  reminders   Reminder[]
+  
+  @@index([birthMonth, birthDay])
+  @@map("friends")
+}
+
+model BirthdayWish {
+  id          String   @id @default(cuid())
+  friendId    String
+  friend      Friend   @relation(fields: [friendId], references: [id], onDelete: Cascade)
+  year        Int      // Which year's birthday
+  wished      Boolean  @default(false)
+  method      String?  // "call", "message", "both"
+  wishedAt    DateTime?
+  notes       String?  @db.Text
+  createdAt   DateTime @default(now())
+  
+  @@unique([friendId, year])
+  @@index([year, wished])
+  @@map("birthday_wishes")
+}
+
+model Reminder {
+  id          String   @id @default(cuid())
+  friendId    String
+  friend      Friend   @relation(fields: [friendId], references: [id], onDelete: Cascade)
+  year        Int
+  type        String   // "week_before", "day_before", "day_after_1", "day_after_2"
+  sent        Boolean  @default(false)
+  sentAt      DateTime?
+  scheduledFor DateTime
+  createdAt   DateTime @default(now())
+  
+  @@index([scheduledFor, sent])
+  @@map("reminders")
+}
+
+model User {
+  id       String @id @default(cuid())
+  email    String @unique
+  name     String?
+  image    String?
+  
+  @@map("users")
+}
